@@ -12,6 +12,7 @@ Create these collections with client permissions set to no direct write access:
 - `users`
 - `portfolioItems`
 - `services`
+- `availabilityWindows`
 - `availabilityRules`
 - `scheduleExceptions`
 - `bookings`
@@ -38,10 +39,25 @@ Do not expose an owner-registration action in the mini program.
 
 - `portfolioItems`: `storeId + status + sortOrder`
 - `services`: `storeId + status + sortOrder`
+- `availabilityWindows`: `storeId + dayStartMs + dayEndMs`
 - `bookings`: `storeId + status + startMs`
 - `bookings`: `customerUserId + createdAtMs`
 - `bookings`: `requestId` unique
 - `notificationJobs`: `status + nextAttemptAtMs`
 - `favorites`: `userId + portfolioItemId` unique
 
-Further booking transaction and scheduler settings are added with their implementation tasks.
+## Scheduler and subscription messages
+
+Deploy `booking-scheduler` as a CloudBase cloud function. Its checked-in timer trigger runs every five minutes. Set these environment variables in the CloudBase console; do not commit their values:
+
+- `BOOKING_REMINDER_TEMPLATE_ID`: the approved WeChat subscription-message template ID.
+- `BOOKING_CREATED_TEMPLATE_ID`: the approved new-booking template sent to the owner.
+- `MINIPROGRAM_STATE`: `developer`, `trial`, or `formal` (defaults to `formal`).
+
+The scheduler releases expired `pending` bookings, creates one reminder job per confirmed booking, and retries temporary delivery failures at most three times. User refusal and invalid-template errors are terminal. A message failure only updates `notificationJobs`; it never changes the booking status.
+
+Add these scheduler indexes:
+
+- `bookings`: `status + lockedUntil`
+- `bookings`: `status + startMs`
+- `notificationJobs`: unique `idempotencyKey`

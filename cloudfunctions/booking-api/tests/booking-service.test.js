@@ -74,6 +74,12 @@ describe('createBooking', () => {
       },
     });
     expect(repository.notificationJobs).toHaveLength(1);
+    expect(repository.notificationJobs[0]).toMatchObject({
+      attempts: 0,
+      nextAttemptAtMs: 0,
+      status: 'pending',
+      type: 'booking_created',
+    });
   });
 
   it('returns the original booking for a repeated request id', async () => {

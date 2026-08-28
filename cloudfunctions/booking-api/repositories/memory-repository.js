@@ -93,6 +93,44 @@ class MemoryRepository {
     return copy(job);
   }
 
+  async listExpiredPending(nowMs) {
+    return copy(this.bookings.filter((booking) => (
+      booking.status === 'pending' && booking.lockedUntil <= nowMs
+    )));
+  }
+
+  async listConfirmedBookingsStartingBetween(windowStartMs, windowEndMs) {
+    return copy(this.bookings.filter((booking) => (
+      booking.status === 'confirmed'
+      && booking.startMs >= windowStartMs
+      && booking.startMs < windowEndMs
+    )));
+  }
+
+  async insertNotificationJobIfAbsent(job) {
+    if (this.notificationJobs.some((existing) => (
+      existing.idempotencyKey === job.idempotencyKey
+    ))) return false;
+    this.notificationJobs.push(copy(job));
+    return true;
+  }
+
+  async listDueNotificationJobs(nowMs) {
+    return copy(this.notificationJobs.filter((job) => (
+      (job.status === 'pending' || job.status === 'retry')
+      && job.nextAttemptAtMs <= nowMs
+    )));
+  }
+
+  async updateNotificationJobIfStatus(jobId, expectedStatus, changes) {
+    const index = this.notificationJobs.findIndex((job) => (
+      job.id === jobId && job.status === expectedStatus
+    ));
+    if (index === -1) return null;
+    this.notificationJobs[index] = { ...this.notificationJobs[index], ...copy(changes) };
+    return copy(this.notificationJobs[index]);
+  }
+
   async runTransaction(work) {
     const previous = this.transactionQueue;
     let release;

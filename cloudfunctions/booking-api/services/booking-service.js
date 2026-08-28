@@ -124,6 +124,8 @@ function createBookingService(repository) {
           type: 'booking_created',
           bookingId: booking.id,
           status: 'pending',
+          attempts: 0,
+          nextAttemptAtMs: input.nowMs,
           createdAtMs: input.nowMs,
         });
         return booking;
