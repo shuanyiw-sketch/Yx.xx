@@ -1,4 +1,4 @@
-const { requireOwner } = require('./auth');
+const { requireAuthenticated, requireOwner } = require('./auth');
 const { domainError } = require('./domain/validation');
 
 const ACTIONS = {
@@ -22,6 +22,14 @@ const ACTIONS = {
     access: 'owner',
     execute: ({ payload, services, session }) => services.admin.saveService(payload, session),
   },
+  'booking.create': {
+    access: 'authenticated',
+    execute: ({ payload, services, session }) => services.booking.createBooking(payload, session),
+  },
+  'booking.command': {
+    access: 'authenticated',
+    execute: ({ payload, services, session }) => services.booking.transitionBooking(payload, session),
+  },
 };
 
 function publicFailure(error) {
@@ -42,9 +50,13 @@ async function route(request, dependencies) {
     }
 
     let session = null;
-    if (definition.access === 'owner') {
+    if (definition.access === 'owner' || definition.access === 'authenticated') {
       session = await dependencies.repository.getSession(request.openId);
-      requireOwner(session, request.payload?.storeId);
+      if (definition.access === 'owner') {
+        requireOwner(session, request.payload?.storeId);
+      } else {
+        requireAuthenticated(session);
+      }
     }
     if (definition.access === 'session' && !request.openId) {
       throw domainError('UNAUTHENTICATED', '请先登录');

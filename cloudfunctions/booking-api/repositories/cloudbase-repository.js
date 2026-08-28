@@ -4,7 +4,13 @@ function normalizeDocument(document) {
   return { id: _id, ...fields };
 }
 
-function createCloudbaseRepository(database) {
+function withoutId(document) {
+  const fields = { ...document };
+  delete fields.id;
+  return fields;
+}
+
+function createCloudbaseRepository(database, rootDatabase = database) {
   return {
     async getSession(openId) {
       const result = await database.collection('users').where({ openId }).limit(1).get();
@@ -44,12 +50,87 @@ function createCloudbaseRepository(database) {
       return result.data.map(normalizeDocument);
     },
 
+    async getPublishedService(storeId, serviceId) {
+      try {
+        const result = await database.collection('services').doc(serviceId).get();
+        const service = normalizeDocument(result.data);
+        if (service?.storeId !== storeId || service.status !== 'published') return null;
+        return service;
+      } catch (error) {
+        if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
+        throw error;
+      }
+    },
+
+    async getAvailabilityWindows(storeId, startMs, endMs) {
+      const command = rootDatabase.command;
+      const result = await database.collection('availabilityWindows').where({
+        storeId,
+        dayStartMs: command.lte(startMs),
+        dayEndMs: command.gte(endMs),
+      }).get();
+      return result.data.map(normalizeDocument);
+    },
+
+    async findBookingByRequestId(customerUserId, requestId) {
+      const result = await database.collection('bookings')
+        .where({ customerUserId, requestId })
+        .limit(1)
+        .get();
+      return normalizeDocument(result.data[0]);
+    },
+
+    async findBlockingPeriods(storeId, startMs, endMs, nowMs) {
+      const { isBookingBlocking } = require('../domain/booking-state');
+      const command = rootDatabase.command;
+      const result = await database.collection('bookings').where({
+        storeId,
+        occupiedStartMs: command.lt(endMs),
+        occupiedEndMs: command.gt(startMs),
+      }).get();
+      return result.data.map(normalizeDocument)
+        .filter((booking) => isBookingBlocking(booking, nowMs))
+        .map((booking) => ({
+          bookingId: booking.id,
+          startMs: booking.occupiedStartMs,
+          endMs: booking.occupiedEndMs,
+        }));
+    },
+
+    async insertBooking(booking) {
+      await database.collection('bookings').doc(booking.id).set({ data: withoutId(booking) });
+      return booking;
+    },
+
+    async getBooking(bookingId) {
+      try {
+        const result = await database.collection('bookings').doc(bookingId).get();
+        return normalizeDocument(result.data);
+      } catch (error) {
+        if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
+        throw error;
+      }
+    },
+
+    async updateBookingIfStatus(bookingId, expectedStatus, changes) {
+      const result = await database.collection('bookings')
+        .where({ _id: bookingId, status: expectedStatus })
+        .update({ data: changes });
+      if (!result.stats?.updated) return null;
+      return this.getBooking(bookingId);
+    },
+
+    async insertNotificationJob(job) {
+      await database.collection('notificationJobs').doc(job.id).set({ data: withoutId(job) });
+      return job;
+    },
+
     async runTransaction(work) {
       return database.runTransaction(async (transaction) => (
-        work(createCloudbaseRepository(transaction))
+        work(createCloudbaseRepository(transaction, rootDatabase))
       ));
     },
   };
 }
 
-module.exports = { createCloudbaseRepository, normalizeDocument };
+module.exports = { createCloudbaseRepository, normalizeDocument, withoutId };

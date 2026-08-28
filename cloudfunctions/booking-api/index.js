@@ -1,6 +1,7 @@
 const cloud = require('wx-server-sdk');
 const { createCloudbaseRepository } = require('./repositories/cloudbase-repository');
 const { createCatalogService } = require('./services/catalog-service');
+const { createBookingService } = require('./services/booking-service');
 const { route } = require('./router');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
@@ -15,6 +16,7 @@ exports.main = async (event) => {
   }, {
     repository,
     services: {
+      booking: createBookingService(repository),
       catalog: createCatalogService(repository),
     },
   });
