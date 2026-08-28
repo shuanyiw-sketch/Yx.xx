@@ -4,9 +4,9 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test": "vitest run --globals",
-    "test:watch": "vitest --globals",
-    "lint": "eslint --no-error-on-unmatched-pattern eslint.config.js \"miniprogram/**/*.js\" \"cloudfunctions/**/*.js\""
+    "test": "vitest run --globals --pool=threads --no-file-parallelism --maxWorkers=1 --minWorkers=1",
+    "test:watch": "vitest --globals --pool=threads --no-file-parallelism --maxWorkers=1 --minWorkers=1",
+    "lint": "node scripts/lint.js"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
