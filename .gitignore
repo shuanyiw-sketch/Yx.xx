@@ -1,0 +1,6 @@
+# Codex-local artifacts
+/outputs/
+/work/
+
+# macOS
+.DS_Store
