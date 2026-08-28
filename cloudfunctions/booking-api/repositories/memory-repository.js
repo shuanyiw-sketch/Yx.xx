@@ -6,6 +6,7 @@ class MemoryRepository {
   constructor(seed = {}) {
     this.availabilityWindows = copy(seed.availabilityWindows || []);
     this.bookings = copy(seed.bookings || []);
+    this.favorites = copy(seed.favorites || []);
     this.notificationJobs = copy(seed.notificationJobs || []);
     this.portfolio = copy(seed.portfolio || []);
     this.services = copy(seed.services || []);
@@ -22,10 +23,24 @@ class MemoryRepository {
     return copy(this.stores.find((store) => store.id === storeId) || null);
   }
 
-  async listPublishedPortfolio(storeId) {
+  async listPublishedPortfolio(storeId, options = {}) {
+    const afterSortOrder = Number.isFinite(options.afterSortOrder)
+      ? options.afterSortOrder
+      : -Infinity;
+    const limit = Number.isInteger(options.limit) ? options.limit : this.portfolio.length;
     return copy(this.portfolio.filter((item) => (
-      item.storeId === storeId && item.status === 'published'
-    )));
+      item.storeId === storeId
+      && item.status === 'published'
+      && (item.sortOrder || 0) > afterSortOrder
+    )).sort((first, second) => (
+      (first.sortOrder || 0) - (second.sortOrder || 0)
+    )).slice(0, limit));
+  }
+
+  async getPublishedPortfolioItem(portfolioItemId) {
+    return copy(this.portfolio.find((item) => (
+      item.id === portfolioItemId && item.status === 'published'
+    )) || null);
   }
 
   async listPublishedServices(storeId) {
@@ -40,6 +55,28 @@ class MemoryRepository {
       && service.storeId === storeId
       && service.status === 'published'
     )) || null);
+  }
+
+  async listFavoritesByUser(userId) {
+    return copy(this.favorites.filter((favorite) => favorite.userId === userId));
+  }
+
+  async getFavorite(userId, portfolioItemId) {
+    return copy(this.favorites.find((favorite) => (
+      favorite.userId === userId && favorite.portfolioItemId === portfolioItemId
+    )) || null);
+  }
+
+  async insertFavorite(favorite) {
+    this.favorites.push(copy(favorite));
+    return copy(favorite);
+  }
+
+  async deleteFavorite(favoriteId) {
+    const index = this.favorites.findIndex((favorite) => favorite.id === favoriteId);
+    if (index === -1) return false;
+    this.favorites.splice(index, 1);
+    return true;
   }
 
   async getAvailabilityWindows(storeId, startMs, endMs) {

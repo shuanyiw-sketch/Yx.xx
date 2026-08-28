@@ -4,6 +4,8 @@
 
 Create one CloudBase environment and select it in WeChat Developer Tools. The mini program uses the currently selected environment; no environment ID is committed to the repository.
 
+After creating the first `stores` document, copy its document ID into `miniprogram/config.js` as `STORE_ID`. This is the public homepage the customer opens by default.
+
 ## Collections
 
 Create these collections with client permissions set to no direct write access:

@@ -1,0 +1,55 @@
+.service-card {
+  background: #fff;
+  border: 1rpx solid #e9e3dc;
+  border-radius: 12rpx;
+  box-shadow: 0 14rpx 36rpx rgba(54, 45, 38, 0.05);
+  margin-bottom: 24rpx;
+  padding: 30rpx;
+}
+
+.topline,
+.footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.name {
+  font-family: "Songti SC", serif;
+  font-size: 34rpx;
+}
+
+.duration,
+.from {
+  color: #8d847c;
+  font-size: 21rpx;
+}
+
+.description {
+  color: #6e6761;
+  display: block;
+  font-size: 25rpx;
+  line-height: 1.7;
+  margin: 20rpx 0 32rpx;
+}
+
+.price {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  margin-top: 4rpx;
+}
+
+.book {
+  background: #24211e;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: 23rpx;
+  line-height: 66rpx;
+  margin: 0;
+  padding: 0 26rpx;
+}
+
+.book::after {
+  border: none;
+}

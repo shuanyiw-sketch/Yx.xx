@@ -1,10 +1,12 @@
 const { callApi } = require('./api/cloud-api');
+const { STORE_ID } = require('./config');
 
 App({
   globalData: {
     isOwner: false,
     sessionReady: null,
     store: null,
+    storeId: STORE_ID,
     user: null,
   },
 
@@ -23,6 +25,7 @@ App({
       const session = await callApi('session.get');
       this.globalData.user = session.user || null;
       this.globalData.store = session.store || null;
+      if (session.store?.id) this.globalData.storeId = session.store.id;
       this.globalData.isOwner = session.isOwner === true;
       return session;
     } catch (error) {

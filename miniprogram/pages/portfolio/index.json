@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "作品"
+  "navigationBarTitleText": "作品",
+  "usingComponents": {
+    "portfolio-card": "/components/portfolio-card/index"
+  }
 }

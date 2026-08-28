@@ -1,1 +1,33 @@
-<view class="page-shell empty-state">个人主页将在这里展示</view>
+<view class="profile-page">
+  <view wx:if="{{loading}}" class="state">正在打开主页…</view>
+  <view wx:elif="{{errorMessage}}" class="state">{{errorMessage}}</view>
+  <block wx:elif="{{store}}">
+    <view class="profile-hero">
+      <view class="portrait-mark">光</view>
+      <text class="eyebrow">CREATIVE STUDIO</text>
+      <text class="name">{{store.name}}</text>
+      <text class="introduction">{{store.introduction}}</text>
+      <button wx:if="{{ownerEntryVisible}}" class="owner-entry" bindtap="openOwnerPanel">进入经营者工作台</button>
+    </view>
+
+    <view wx:if="{{representativeWorks.length}}" class="section works-section">
+      <text class="section-label">代表作品</text>
+      <scroll-view class="works" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="work-card" wx:for="{{representativeWorks}}" wx:key="id">
+          <portfolio-card item="{{item}}" bind:open="openWork" />
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section info-card" bindtap="copyContact">
+      <text class="section-label">联系与沟通</text>
+      <text class="info-text">{{store.contactText || '预约确认后提供详细联系方式'}}</text>
+      <text wx:if="{{store.contactText}}" class="copy-tip">轻触复制</text>
+    </view>
+
+    <view class="section policy-card">
+      <text class="section-label">预约须知</text>
+      <text class="info-text">{{store.bookingPolicy || '提交预约后，经营者将在 24 小时内确认。最终费用与交付方式以双方沟通为准。'}}</text>
+    </view>
+  </block>
+</view>

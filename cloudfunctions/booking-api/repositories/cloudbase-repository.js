@@ -34,12 +34,28 @@ function createCloudbaseRepository(database, rootDatabase = database) {
       }
     },
 
-    async listPublishedPortfolio(storeId) {
+    async listPublishedPortfolio(storeId, options = {}) {
+      const query = { storeId, status: 'published' };
+      if (Number.isFinite(options.afterSortOrder)) {
+        query.sortOrder = rootDatabase.command.gt(options.afterSortOrder);
+      }
       const result = await database.collection('portfolioItems')
-        .where({ storeId, status: 'published' })
+        .where(query)
         .orderBy('sortOrder', 'asc')
+        .limit(options.limit || 20)
         .get();
       return result.data.map(normalizeDocument);
+    },
+
+    async getPublishedPortfolioItem(portfolioItemId) {
+      try {
+        const result = await database.collection('portfolioItems').doc(portfolioItemId).get();
+        const item = normalizeDocument(result.data);
+        return item?.status === 'published' ? item : null;
+      } catch (error) {
+        if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
+        throw error;
+      }
     },
 
     async listPublishedServices(storeId) {
@@ -60,6 +76,29 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
         throw error;
       }
+    },
+
+    async listFavoritesByUser(userId) {
+      const result = await database.collection('favorites').where({ userId }).get();
+      return result.data.map(normalizeDocument);
+    },
+
+    async getFavorite(userId, portfolioItemId) {
+      const result = await database.collection('favorites')
+        .where({ userId, portfolioItemId })
+        .limit(1)
+        .get();
+      return normalizeDocument(result.data[0]);
+    },
+
+    async insertFavorite(favorite) {
+      await database.collection('favorites').doc(favorite.id).set({ data: withoutId(favorite) });
+      return favorite;
+    },
+
+    async deleteFavorite(favoriteId) {
+      const result = await database.collection('favorites').doc(favoriteId).remove();
+      return Boolean(result.stats?.removed);
     },
 
     async getAvailabilityWindows(storeId, startMs, endMs) {

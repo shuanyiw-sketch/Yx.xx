@@ -12,11 +12,36 @@ const ACTIONS = {
   },
   'catalog.listPortfolio': {
     access: 'public',
-    execute: ({ payload, services }) => services.catalog.listPortfolio(payload.storeId),
+    execute: ({ payload, services }) => services.catalog.listPortfolio(payload.storeId, {
+      afterSortOrder: payload.afterSortOrder,
+      limit: payload.limit,
+    }),
+  },
+  'catalog.getPortfolioItem': {
+    access: 'public',
+    execute: ({ payload, services }) => services.catalog.getPortfolioItem(payload.portfolioItemId),
   },
   'catalog.listServices': {
     access: 'public',
     execute: ({ payload, services }) => services.catalog.listServices(payload.storeId),
+  },
+  'catalog.getService': {
+    access: 'public',
+    execute: ({ payload, services }) => services.catalog.getService(
+      payload.storeId,
+      payload.serviceId,
+    ),
+  },
+  'favorite.toggle': {
+    access: 'authenticated',
+    execute: ({ payload, services, session }) => services.catalog.toggleFavorite(
+      payload.portfolioItemId,
+      session,
+    ),
+  },
+  'favorite.listMine': {
+    access: 'authenticated',
+    execute: ({ services, session }) => services.catalog.listFavorites(session),
   },
   'admin.service.save': {
     access: 'owner',

@@ -1,1 +1,21 @@
-<view class="page-shell empty-state">作品将在这里展示</view>
+<view class="page-shell portfolio-page">
+  <view class="hero">
+    <text class="eyebrow">SELECTED WORKS</text>
+    <text class="section-title">从喜欢的画面开始</text>
+    <text class="hero-copy">浏览真实作品，找到你想留下的光线、情绪与故事。</text>
+    <button wx:if="{{ownerEntryVisible}}" class="owner-entry" bindtap="openOwnerPanel">经营者工作台</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">正在整理作品…</view>
+  <view wx:elif="{{errorMessage}}" class="state">{{errorMessage}}</view>
+  <view wx:elif="{{!left.length}}" class="state">作品正在准备中</view>
+  <view wx:else class="masonry">
+    <view class="column">
+      <portfolio-card wx:for="{{left}}" wx:key="id" item="{{item}}" bind:open="openWork" />
+    </view>
+    <view class="column column-offset">
+      <portfolio-card wx:for="{{right}}" wx:key="id" item="{{item}}" bind:open="openWork" />
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="loading-more">正在加载更多…</view>
+</view>

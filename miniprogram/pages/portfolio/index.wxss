@@ -1,1 +1,67 @@
+.portfolio-page {
+  padding-top: 48rpx;
+}
 
+.hero {
+  margin-bottom: 48rpx;
+}
+
+.section-title,
+.hero-copy {
+  display: block;
+}
+
+.section-title {
+  margin-top: 18rpx;
+}
+
+.hero-copy {
+  color: #7c746e;
+  font-size: 25rpx;
+  line-height: 1.75;
+  margin-top: 18rpx;
+  max-width: 590rpx;
+}
+
+.owner-entry {
+  background: transparent;
+  border: 1rpx solid #c9b9ad;
+  border-radius: 999rpx;
+  color: #705f53;
+  font-size: 22rpx;
+  line-height: 58rpx;
+  margin: 24rpx 0 0;
+  padding: 0 24rpx;
+  width: max-content;
+}
+
+.owner-entry::after {
+  border: none;
+}
+
+.masonry {
+  display: flex;
+  gap: 22rpx;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+}
+
+.column-offset {
+  padding-top: 52rpx;
+}
+
+.state {
+  color: #8b827a;
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.loading-more {
+  color: #91877f;
+  font-size: 22rpx;
+  padding: 30rpx 0 12rpx;
+  text-align: center;
+}

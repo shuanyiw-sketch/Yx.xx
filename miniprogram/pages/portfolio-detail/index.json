@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "服务",
+  "navigationBarTitleText": "作品详情",
   "usingComponents": {
     "service-card": "/components/service-card/index"
   }

@@ -1,0 +1,14 @@
+<view class="service-card">
+  <view class="topline">
+    <text class="name">{{service.name}}</text>
+    <text class="duration">约 {{service.durationMinutes}} 分钟</text>
+  </view>
+  <text wx:if="{{service.description}}" class="description">{{service.description}}</text>
+  <view class="footer">
+    <view>
+      <text class="from">参考价</text>
+      <text class="price">¥{{service.priceYuan}}</text>
+    </view>
+    <button class="book" bindtap="book">预约类似服务</button>
+  </view>
+</view>

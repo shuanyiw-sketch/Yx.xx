@@ -1,1 +1,13 @@
-<view class="page-shell empty-state">服务项目将在这里展示</view>
+<view class="page-shell services-page">
+  <view class="hero">
+    <text class="eyebrow">SERVICES</text>
+    <text class="section-title">选一种记录方式</text>
+    <text class="intro">{{store.introduction || '每一次拍摄或妆造，都会在沟通后为你保留专属时间。'}}</text>
+  </view>
+  <view wx:if="{{loading}}" class="state">正在读取服务…</view>
+  <view wx:elif="{{errorMessage}}" class="state">{{errorMessage}}</view>
+  <view wx:elif="{{!services.length}}" class="state">服务项目正在准备中</view>
+  <view wx:else>
+    <service-card wx:for="{{services}}" wx:key="id" service="{{item}}" bind:book="book" />
+  </view>
+</view>
