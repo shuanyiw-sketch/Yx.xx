@@ -72,6 +72,27 @@ function createCloudbaseRepository(database, rootDatabase = database) {
       return result.data.map(normalizeDocument);
     },
 
+    async getService(serviceId) {
+      try {
+        const result = await database.collection('services').doc(serviceId).get();
+        return normalizeDocument(result.data);
+      } catch (error) {
+        if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
+        throw error;
+      }
+    },
+
+    async saveService(service) {
+      await database.collection('services').doc(service.id).set({ data: withoutId(service) });
+      return service;
+    },
+
+    async updateService(serviceId, changes) {
+      const result = await database.collection('services').doc(serviceId).update({ data: changes });
+      if (!result.stats?.updated) return null;
+      return this.getService(serviceId);
+    },
+
     async getPublishedService(storeId, serviceId) {
       try {
         const result = await database.collection('services').doc(serviceId).get();
@@ -163,6 +184,51 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         .orderBy('createdAtMs', 'desc')
         .get();
       return result.data.map(normalizeDocument);
+    },
+
+    async listBookingsByStore(storeId) {
+      const result = await database.collection('bookings').where({ storeId }).get();
+      return result.data.map(normalizeDocument);
+    },
+
+    async getPortfolioItem(portfolioItemId) {
+      try {
+        const result = await database.collection('portfolioItems').doc(portfolioItemId).get();
+        return normalizeDocument(result.data);
+      } catch (error) {
+        if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
+        throw error;
+      }
+    },
+
+    async savePortfolioItem(portfolioItem) {
+      await database.collection('portfolioItems')
+        .doc(portfolioItem.id)
+        .set({ data: withoutId(portfolioItem) });
+      return portfolioItem;
+    },
+
+    async saveAvailabilityRule(rule) {
+      await database.collection('availabilityRules').doc(rule.id).set({ data: withoutId(rule) });
+      return rule;
+    },
+
+    async listScheduleExceptions(storeId) {
+      const result = await database.collection('scheduleExceptions').where({ storeId }).get();
+      return result.data.map(normalizeDocument);
+    },
+
+    async saveScheduleException(exception) {
+      await database.collection('scheduleExceptions')
+        .doc(exception.id)
+        .set({ data: withoutId(exception) });
+      return exception;
+    },
+
+    async updateStore(storeId, changes) {
+      const result = await database.collection('stores').doc(storeId).update({ data: changes });
+      if (!result.stats?.updated) return null;
+      return this.getStore(storeId);
     },
 
     async updateBookingIfStatus(bookingId, expectedStatus, changes) {

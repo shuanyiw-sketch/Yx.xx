@@ -5,11 +5,13 @@ function copy(value) {
 class MemoryRepository {
   constructor(seed = {}) {
     this.availabilityWindows = copy(seed.availabilityWindows || []);
+    this.availabilityRules = copy(seed.availabilityRules || []);
     this.bookings = copy(seed.bookings || []);
     this.favorites = copy(seed.favorites || []);
     this.notificationJobs = copy(seed.notificationJobs || []);
     this.portfolio = copy(seed.portfolio || []);
     this.services = copy(seed.services || []);
+    this.scheduleExceptions = copy(seed.scheduleExceptions || []);
     this.sessions = copy(seed.sessions || []);
     this.stores = copy(seed.stores || []);
     this.transactionQueue = Promise.resolve();
@@ -47,6 +49,24 @@ class MemoryRepository {
     return copy(this.services.filter((service) => (
       service.storeId === storeId && service.status === 'published'
     )));
+  }
+
+  async getService(serviceId) {
+    return copy(this.services.find((service) => service.id === serviceId) || null);
+  }
+
+  async saveService(service) {
+    const index = this.services.findIndex((existing) => existing.id === service.id);
+    if (index === -1) this.services.push(copy(service));
+    else this.services[index] = { ...this.services[index], ...copy(service) };
+    return copy(index === -1 ? this.services[this.services.length - 1] : this.services[index]);
+  }
+
+  async updateService(serviceId, changes) {
+    const index = this.services.findIndex((service) => service.id === serviceId);
+    if (index === -1) return null;
+    this.services[index] = { ...this.services[index], ...copy(changes) };
+    return copy(this.services[index]);
   }
 
   async getPublishedService(storeId, serviceId) {
@@ -122,6 +142,50 @@ class MemoryRepository {
     )).sort((first, second) => (
       (second.createdAtMs || 0) - (first.createdAtMs || 0)
     )));
+  }
+
+  async listBookingsByStore(storeId) {
+    return copy(this.bookings.filter((booking) => booking.storeId === storeId));
+  }
+
+  async getPortfolioItem(portfolioItemId) {
+    return copy(this.portfolio.find((item) => item.id === portfolioItemId) || null);
+  }
+
+  async savePortfolioItem(portfolioItem) {
+    const index = this.portfolio.findIndex((item) => item.id === portfolioItem.id);
+    if (index === -1) this.portfolio.push(copy(portfolioItem));
+    else this.portfolio[index] = { ...this.portfolio[index], ...copy(portfolioItem) };
+    return copy(index === -1 ? this.portfolio[this.portfolio.length - 1] : this.portfolio[index]);
+  }
+
+  async saveAvailabilityRule(rule) {
+    const index = this.availabilityRules.findIndex((existing) => existing.id === rule.id);
+    if (index === -1) this.availabilityRules.push(copy(rule));
+    else this.availabilityRules[index] = { ...this.availabilityRules[index], ...copy(rule) };
+    return copy(index === -1
+      ? this.availabilityRules[this.availabilityRules.length - 1]
+      : this.availabilityRules[index]);
+  }
+
+  async listScheduleExceptions(storeId) {
+    return copy(this.scheduleExceptions.filter((exception) => exception.storeId === storeId));
+  }
+
+  async saveScheduleException(exception) {
+    const index = this.scheduleExceptions.findIndex((existing) => existing.id === exception.id);
+    if (index === -1) this.scheduleExceptions.push(copy(exception));
+    else this.scheduleExceptions[index] = { ...this.scheduleExceptions[index], ...copy(exception) };
+    return copy(index === -1
+      ? this.scheduleExceptions[this.scheduleExceptions.length - 1]
+      : this.scheduleExceptions[index]);
+  }
+
+  async updateStore(storeId, changes) {
+    const index = this.stores.findIndex((store) => store.id === storeId);
+    if (index === -1) return null;
+    this.stores[index] = { ...this.stores[index], ...copy(changes) };
+    return copy(this.stores[index]);
   }
 
   async updateBookingIfStatus(bookingId, expectedStatus, changes) {

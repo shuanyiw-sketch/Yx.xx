@@ -1,0 +1,1 @@
+.title,.name,.time{display:block}.title{margin-top:16rpx}.name{font-size:27rpx}.time{font-size:21rpx;margin-top:8rpx}

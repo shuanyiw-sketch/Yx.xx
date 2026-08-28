@@ -47,6 +47,66 @@ const ACTIONS = {
     access: 'owner',
     execute: ({ payload, services, session }) => services.admin.saveService(payload, session),
   },
+  'admin.dashboard.get': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.getDashboard(
+      payload.storeId,
+      session,
+    ),
+  },
+  'admin.booking.command': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.commandBooking({
+      ...payload,
+      nowMs: Date.now(),
+    }, session),
+  },
+  'admin.booking.recordReceipt': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.recordReceipt({
+      ...payload,
+      nowMs: Date.now(),
+    }, session),
+  },
+  'admin.service.unpublish': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.unpublishService(payload, session),
+  },
+  'admin.portfolio.save': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.savePortfolio(payload, session),
+  },
+  'admin.portfolio.publish': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.publishPortfolio(payload, session),
+  },
+  'admin.portfolio.reorder': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.reorderPortfolio(payload, session),
+  },
+  'admin.schedule.saveRule': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.schedule.saveRule(payload, session),
+  },
+  'admin.schedule.saveException': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.schedule.saveException(payload, session),
+  },
+  'admin.customer.list': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.listCustomers(
+      payload.storeId,
+      session,
+    ),
+  },
+  'admin.customer.get': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.getCustomer(payload, session),
+  },
+  'admin.store.save': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.saveStore(payload, session),
+  },
   'booking.create': {
     access: 'authenticated',
     execute: ({ payload, services, session }) => services.booking.createBooking({

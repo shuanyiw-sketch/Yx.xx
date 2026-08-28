@@ -6,7 +6,15 @@
     "pages/booking-create/index",
     "pages/bookings/index",
     "pages/booking-detail/index",
-    "pages/profile/index"
+    "pages/profile/index",
+    "pages/admin/dashboard/index",
+    "pages/admin/calendar/index",
+    "pages/admin/booking-detail/index",
+    "pages/admin/services/index",
+    "pages/admin/portfolio/index",
+    "pages/admin/availability/index",
+    "pages/admin/customers/index",
+    "pages/admin/store/index"
   ],
   "window": {
     "backgroundColor": "#F7F5F2",
