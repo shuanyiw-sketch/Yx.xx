@@ -1,0 +1,136 @@
+.booking-page {
+  padding-bottom: 72rpx;
+}
+
+.service-summary {
+  background: #e9e0d6;
+  margin: -32rpx -32rpx 0;
+  padding: 52rpx 32rpx 44rpx;
+}
+
+.service-name {
+  display: block;
+  font-family: "Songti SC", serif;
+  font-size: 48rpx;
+  margin-top: 16rpx;
+}
+
+.service-meta {
+  color: #756b64;
+  display: flex;
+  font-size: 24rpx;
+  gap: 28rpx;
+  margin-top: 18rpx;
+}
+
+.section {
+  margin-top: 52rpx;
+}
+
+.step {
+  display: block;
+  font-family: "Songti SC", serif;
+  font-size: 32rpx;
+  margin-bottom: 26rpx;
+}
+
+.date-scroll {
+  white-space: nowrap;
+}
+
+.date,
+.slot {
+  background: #fff;
+  border: 1rpx solid #ded8d2;
+  border-radius: 999rpx;
+  color: #615a55;
+  display: inline-block;
+  font-size: 23rpx;
+  line-height: 66rpx;
+  margin: 0 14rpx 0 0;
+  padding: 0 24rpx;
+}
+
+.date::after,
+.slot::after,
+.submit::after {
+  border: none;
+}
+
+.date.selected,
+.slot.selected {
+  background: #292622;
+  border-color: #292622;
+  color: #fff;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 26rpx;
+}
+
+.slot {
+  margin: 0;
+  min-width: 142rpx;
+}
+
+.no-slots {
+  color: #8d847d;
+  font-size: 24rpx;
+  padding: 30rpx 0;
+}
+
+.form-section {
+  border-top: 1rpx solid #ded8d1;
+  padding-top: 46rpx;
+}
+
+.field {
+  border-bottom: 1rpx solid #e4ded8;
+  padding: 24rpx 0;
+}
+
+.label {
+  color: #7f766f;
+  display: block;
+  font-size: 22rpx;
+  margin-bottom: 14rpx;
+}
+
+input,
+textarea {
+  font-size: 28rpx;
+  width: 100%;
+}
+
+textarea {
+  height: 180rpx;
+  line-height: 1.65;
+}
+
+.notice {
+  background: #efe9e2;
+  border-radius: 10rpx;
+  color: #756a62;
+  font-size: 22rpx;
+  line-height: 1.7;
+  margin-top: 40rpx;
+  padding: 24rpx;
+}
+
+.submit {
+  background: #292622;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: 27rpx;
+  line-height: 92rpx;
+  margin-top: 30rpx;
+}
+
+.state {
+  color: #8b827a;
+  padding: 180rpx 0;
+  text-align: center;
+}

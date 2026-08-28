@@ -1,3 +1,4 @@
 module.exports = {
+  BOOKING_STATUS_TEMPLATE_ID: '',
   STORE_ID: 'REPLACE_WITH_STORE_DOCUMENT_ID',
 };

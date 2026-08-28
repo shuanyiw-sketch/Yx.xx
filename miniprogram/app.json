@@ -3,7 +3,9 @@
     "pages/portfolio/index",
     "pages/portfolio-detail/index",
     "pages/services/index",
+    "pages/booking-create/index",
     "pages/bookings/index",
+    "pages/booking-detail/index",
     "pages/profile/index"
   ],
   "window": {
@@ -22,7 +24,7 @@
       { "pagePath": "pages/portfolio/index", "text": "作品" },
       { "pagePath": "pages/services/index", "text": "服务" },
       { "pagePath": "pages/bookings/index", "text": "预约" },
-      { "pagePath": "pages/profile/index", "text": "关于" }
+      { "pagePath": "pages/profile/index", "text": "我的" }
     ]
   },
   "style": "v2",

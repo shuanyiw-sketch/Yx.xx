@@ -1,0 +1,63 @@
+<view class="page-shell booking-page">
+  <view wx:if="{{loading}}" class="state">正在读取可预约档期…</view>
+  <block wx:elif="{{service}}">
+    <view class="service-summary">
+      <text class="eyebrow">BOOKING</text>
+      <text class="service-name">{{service.name}}</text>
+      <view class="service-meta">
+        <text>约 {{service.durationMinutes}} 分钟</text>
+        <text>参考价 ¥{{service.priceYuan}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="step">01 / 选择日期</text>
+      <scroll-view class="date-scroll" scroll-x="true" show-scrollbar="false">
+        <button
+          wx:for="{{dates}}"
+          wx:key="dateKey"
+          class="date {{selectedDateKey === item.dateKey ? 'selected' : ''}}"
+          data-key="{{item.dateKey}}"
+          bindtap="selectDate"
+        >{{item.label}}</button>
+      </scroll-view>
+      <view class="slots">
+        <button
+          wx:for="{{slots}}"
+          wx:key="startMs"
+          class="slot {{selectedSlot.startMs === item.startMs ? 'selected' : ''}}"
+          data-start="{{item.startMs}}"
+          bindtap="selectSlot"
+        >{{item.label}}</button>
+        <text wx:if="{{!slots.length}}" class="no-slots">这一天暂无可预约时间</text>
+      </view>
+    </view>
+
+    <view class="section form-section">
+      <text class="step">02 / 告诉我你的需求</text>
+      <view class="field">
+        <text class="label">联系人</text>
+        <input value="{{form.name}}" data-field="name" bindinput="updateField" placeholder="怎么称呼你" />
+      </view>
+      <view class="field">
+        <text class="label">手机号</text>
+        <input value="{{form.phone}}" data-field="phone" bindinput="updateField" type="number" maxlength="11" placeholder="用于确认预约" />
+      </view>
+      <view class="field">
+        <text class="label">地点</text>
+        <input value="{{form.location}}" data-field="location" bindinput="updateField" placeholder="拍摄或服务地点，可稍后确定" />
+      </view>
+      <view class="field">
+        <text class="label">人数</text>
+        <input value="{{form.peopleCount}}" data-field="peopleCount" bindinput="updateField" type="number" placeholder="1" />
+      </view>
+      <view class="field field-notes">
+        <text class="label">补充需求</text>
+        <textarea value="{{form.notes}}" data-field="notes" bindinput="updateField" placeholder="喜欢的风格、服装、妆造或其他想法" maxlength="500" />
+      </view>
+    </view>
+
+    <view class="notice">提交后将为你临时保留档期 24 小时，经营者确认后预约正式生效。费用在线下沟通，本小程序不收款。</view>
+    <button class="submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交预约</button>
+  </block>
+</view>

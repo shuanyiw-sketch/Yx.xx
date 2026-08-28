@@ -1,0 +1,85 @@
+.detail-page {
+  padding-top: 50rpx;
+}
+
+.header {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: "Songti SC", serif;
+  font-size: 48rpx;
+  margin-top: 22rpx;
+}
+
+.time {
+  color: #756d67;
+  font-size: 28rpx;
+  margin-top: 14rpx;
+}
+
+.card {
+  background: #fff;
+  border: 1rpx solid #e4ded8;
+  border-radius: 12rpx;
+  margin-top: 42rpx;
+  padding: 8rpx 30rpx;
+}
+
+.row {
+  align-items: center;
+  border-bottom: 1rpx solid #eee9e4;
+  display: flex;
+  font-size: 26rpx;
+  justify-content: space-between;
+  min-height: 88rpx;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row-block {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 14rpx;
+  line-height: 1.7;
+  padding: 24rpx 0;
+}
+
+.label {
+  color: #887f78;
+  font-size: 23rpx;
+}
+
+.price-note {
+  color: #6f665f;
+  display: flex;
+  flex-direction: column;
+  font-size: 23rpx;
+  gap: 12rpx;
+  line-height: 1.6;
+  margin-top: 30rpx;
+}
+
+.secondary-action {
+  background: transparent;
+  border: 1rpx solid #9e8b7e;
+  border-radius: 999rpx;
+  color: #5f5148;
+  font-size: 26rpx;
+  line-height: 84rpx;
+  margin-top: 42rpx;
+}
+
+.secondary-action::after {
+  border: none;
+}
+
+.state {
+  color: #8b827a;
+  padding: 140rpx 0;
+  text-align: center;
+}

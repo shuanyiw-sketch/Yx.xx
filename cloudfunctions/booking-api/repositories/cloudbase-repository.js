@@ -13,9 +13,15 @@ function withoutId(document) {
 function createCloudbaseRepository(database, rootDatabase = database) {
   return {
     async getSession(openId) {
+      if (!openId) return null;
       const result = await database.collection('users').where({ openId }).limit(1).get();
-      const user = normalizeDocument(result.data[0]);
-      if (!user) return null;
+      let user = normalizeDocument(result.data[0]);
+      if (!user) {
+        const crypto = require('node:crypto');
+        const id = `user-${crypto.createHash('sha256').update(openId).digest('hex')}`;
+        user = { id, openId, role: 'customer', createdAtMs: Date.now() };
+        await database.collection('users').doc(id).set({ data: withoutId(user) });
+      }
       return {
         isOwner: user.role === 'owner',
         openId,
@@ -149,6 +155,14 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
         throw error;
       }
+    },
+
+    async listBookingsByCustomer(customerUserId) {
+      const result = await database.collection('bookings')
+        .where({ customerUserId })
+        .orderBy('createdAtMs', 'desc')
+        .get();
+      return result.data.map(normalizeDocument);
     },
 
     async updateBookingIfStatus(bookingId, expectedStatus, changes) {

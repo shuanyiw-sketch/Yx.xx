@@ -46,6 +46,6 @@ Page({
   },
 
   openOwnerPanel() {
-    wx.navigateTo({ url: '/pages/owner/index' });
+    wx.navigateTo({ url: '/pages/admin/dashboard/index' });
   },
 });

@@ -49,11 +49,35 @@ const ACTIONS = {
   },
   'booking.create': {
     access: 'authenticated',
-    execute: ({ payload, services, session }) => services.booking.createBooking(payload, session),
+    execute: ({ payload, services, session }) => services.booking.createBooking({
+      ...payload,
+      nowMs: Date.now(),
+    }, session),
   },
   'booking.command': {
     access: 'authenticated',
-    execute: ({ payload, services, session }) => services.booking.transitionBooking(payload, session),
+    execute: ({ payload, services, session }) => services.booking.transitionBooking({
+      ...payload,
+      nowMs: Date.now(),
+    }, session),
+  },
+  'booking.listMine': {
+    access: 'authenticated',
+    execute: ({ services, session }) => services.booking.listMine(session),
+  },
+  'booking.getMine': {
+    access: 'authenticated',
+    execute: ({ payload, services, session }) => services.booking.getMine(
+      payload.bookingId,
+      session,
+    ),
+  },
+  'availability.listSlots': {
+    access: 'public',
+    execute: ({ payload, services }) => services.booking.listAvailableSlots({
+      ...payload,
+      nowMs: Date.now(),
+    }),
   },
 };
 

@@ -175,3 +175,44 @@ describe('transitionBooking', () => {
     expect(repository.bookings).toHaveLength(1);
   });
 });
+
+describe('customer booking reads', () => {
+  it('lists only the authenticated customer bookings', async () => {
+    const { service } = createFixture({
+      bookings: [
+        { id: 'mine', customerUserId: 'customer-1', createdAtMs: 2 },
+        { id: 'other', customerUserId: 'customer-2', createdAtMs: 3 },
+      ],
+    });
+
+    await expect(service.listMine(customerSession)).resolves.toEqual([
+      expect.objectContaining({ id: 'mine' }),
+    ]);
+    await expect(service.getMine('other', customerSession)).rejects.toMatchObject({
+      code: 'BOOKING_NOT_FOUND',
+    });
+  });
+
+  it('calculates public slots from server-side service duration and busy periods', async () => {
+    const { service } = createFixture({
+      bookings: [{
+        id: 'busy',
+        storeId: 'store-1',
+        status: 'confirmed',
+        occupiedStartMs: 2.5 * HOUR,
+        occupiedEndMs: 5.5 * HOUR,
+      }],
+    });
+
+    const slots = await service.listAvailableSlots({
+      storeId: 'store-1',
+      serviceId: 'service-1',
+      dayStartMs: 0,
+      dayEndMs: 12 * HOUR,
+      nowMs: 0,
+    });
+
+    expect(slots.some((slot) => slot.startMs === 3 * HOUR)).toBe(false);
+    expect(slots.some((slot) => slot.startMs === 6 * HOUR)).toBe(true);
+  });
+});

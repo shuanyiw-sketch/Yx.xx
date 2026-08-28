@@ -116,6 +116,14 @@ class MemoryRepository {
     return copy(this.bookings.find((booking) => booking.id === bookingId) || null);
   }
 
+  async listBookingsByCustomer(customerUserId) {
+    return copy(this.bookings.filter((booking) => (
+      booking.customerUserId === customerUserId
+    )).sort((first, second) => (
+      (second.createdAtMs || 0) - (first.createdAtMs || 0)
+    )));
+  }
+
   async updateBookingIfStatus(bookingId, expectedStatus, changes) {
     const index = this.bookings.findIndex((booking) => (
       booking.id === bookingId && booking.status === expectedStatus

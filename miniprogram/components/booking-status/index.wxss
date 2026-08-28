@@ -1,0 +1,31 @@
+.status {
+  background: #eee9e3;
+  border-radius: 999rpx;
+  color: #6f665f;
+  display: inline-block;
+  font-size: 21rpx;
+  padding: 9rpx 18rpx;
+}
+
+.status-pending,
+.status-cancel_requested {
+  background: #f4e8ce;
+  color: #86651f;
+}
+
+.status-confirmed {
+  background: #dfece4;
+  color: #356044;
+}
+
+.status-rejected,
+.status-expired,
+.status-cancelled {
+  background: #ece9e7;
+  color: #817a75;
+}
+
+.status-completed {
+  background: #e4e6ef;
+  color: #4d5575;
+}

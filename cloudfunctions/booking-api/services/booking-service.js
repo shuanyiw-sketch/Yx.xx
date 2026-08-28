@@ -46,6 +46,54 @@ function serviceSnapshot(service) {
 
 function createBookingService(repository) {
   return {
+    async listAvailableSlots(input) {
+      if (!input?.storeId || !input?.serviceId
+        || !Number.isFinite(input.dayStartMs)
+        || !Number.isFinite(input.dayEndMs)
+        || !Number.isFinite(input.nowMs)) {
+        throw domainError('INVALID_INPUT', '档期查询参数无效');
+      }
+      const service = await repository.getPublishedService(input.storeId, input.serviceId);
+      if (!service) throw domainError('SERVICE_NOT_FOUND', '服务不存在或已下架');
+      const windows = await repository.getAvailabilityWindows(
+        input.storeId,
+        input.dayStartMs,
+        input.dayEndMs,
+      );
+      const window = windows[0];
+      if (!window) return [];
+      const busy = await repository.findBlockingPeriods(
+        input.storeId,
+        window.dayStartMs,
+        window.dayEndMs,
+        input.nowMs,
+      );
+      return calculateAvailableSlots({
+        dayStartMs: window.dayStartMs,
+        dayEndMs: window.dayEndMs,
+        minimumStartMs: input.nowMs + 2 * HOUR_MS,
+        intervalMinutes: window.intervalMinutes,
+        serviceMinutes: service.durationMinutes,
+        bufferBeforeMinutes: service.bufferBeforeMinutes,
+        bufferAfterMinutes: service.bufferAfterMinutes,
+        busy,
+      });
+    },
+
+    async listMine(session) {
+      requireAuthenticated(session);
+      return repository.listBookingsByCustomer(session.userId);
+    },
+
+    async getMine(bookingId, session) {
+      requireAuthenticated(session);
+      const booking = await repository.getBooking(bookingId);
+      if (!booking || booking.customerUserId !== session.userId) {
+        throw domainError('BOOKING_NOT_FOUND', '预约不存在');
+      }
+      return booking;
+    },
+
     async createBooking(input, session) {
       requireAuthenticated(session);
       assertCreateInput(input);

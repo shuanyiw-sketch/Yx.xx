@@ -6,6 +6,8 @@ Create one CloudBase environment and select it in WeChat Developer Tools. The mi
 
 After creating the first `stores` document, copy its document ID into `miniprogram/config.js` as `STORE_ID`. This is the public homepage the customer opens by default.
 
+After WeChat approves the customer booking-status subscription template, put its template ID in `miniprogram/config.js` as `BOOKING_STATUS_TEMPLATE_ID`. Leaving it empty disables the permission prompt but does not block booking submission.
+
 ## Collections
 
 Create these collections with client permissions set to no direct write access:

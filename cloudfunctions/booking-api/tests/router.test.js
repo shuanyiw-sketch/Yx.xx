@@ -109,7 +109,7 @@ describe('route', () => {
 
     expect(result).toEqual({ ok: true, data: { id: 'booking-1' } });
     expect(dependencies.services.booking.createBooking).toHaveBeenCalledWith(
-      payload,
+      expect.objectContaining({ ...payload, nowMs: expect.any(Number) }),
       expect.objectContaining({ userId: 'customer-1' }),
     );
   });
