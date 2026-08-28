@@ -1,0 +1,15 @@
+{
+  "name": "personal-creative-booking-mini-program",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "vitest run --globals",
+    "test:watch": "vitest --globals",
+    "lint": "eslint --no-error-on-unmatched-pattern eslint.config.js \"miniprogram/**/*.js\" \"cloudfunctions/**/*.js\""
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "vitest": "^2.1.9"
+  }
+}

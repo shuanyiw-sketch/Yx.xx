@@ -1,0 +1,14 @@
+{
+  "appid": "touristappid",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "compileType": "miniprogram",
+  "description": "个人摄影师与化妆师作品预约小程序",
+  "miniprogramRoot": "miniprogram/",
+  "projectname": "personal-creative-booking",
+  "setting": {
+    "es6": true,
+    "minified": false,
+    "postcss": true,
+    "urlCheck": true
+  }
+}

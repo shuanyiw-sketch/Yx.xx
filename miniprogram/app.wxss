@@ -1,0 +1,18 @@
+page {
+  background: #f7f5f2;
+  color: #24211e;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 28rpx;
+}
+
+.page-shell {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 32rpx;
+}
+
+.empty-state {
+  color: #817b74;
+  padding: 160rpx 32rpx;
+  text-align: center;
+}

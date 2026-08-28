@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/portfolio/index",
+    "pages/services/index",
+    "pages/bookings/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "backgroundColor": "#F7F5F2",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "作品预约"
+  },
+  "tabBar": {
+    "color": "#817B74",
+    "selectedColor": "#24211E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/portfolio/index", "text": "作品" },
+      { "pagePath": "pages/services/index", "text": "服务" },
+      { "pagePath": "pages/bookings/index", "text": "预约" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
