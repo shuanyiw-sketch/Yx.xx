@@ -102,8 +102,14 @@ class MemoryRepository {
   async getAvailabilityWindows(storeId, startMs, endMs) {
     return copy(this.availabilityWindows.filter((window) => (
       window.storeId === storeId
-      && window.dayStartMs <= startMs
-      && window.dayEndMs >= endMs
+      && window.dayStartMs < endMs
+      && startMs < window.dayEndMs
+    )));
+  }
+
+  async listAvailabilityRules(storeId, weekday) {
+    return copy(this.availabilityRules.filter((rule) => (
+      rule.storeId === storeId && rule.weekday === weekday
     )));
   }
 
@@ -113,9 +119,13 @@ class MemoryRepository {
     )) || null);
   }
 
+  async touchScheduleGuard() {
+    return true;
+  }
+
   async findBlockingPeriods(storeId, startMs, endMs, nowMs) {
     const { isBookingBlocking } = require('../domain/booking-state');
-    return copy(this.bookings.filter((booking) => (
+    const bookings = this.bookings.filter((booking) => (
       booking.storeId === storeId
       && isBookingBlocking(booking, nowMs)
       && booking.occupiedStartMs < endMs
@@ -124,7 +134,17 @@ class MemoryRepository {
       bookingId: booking.id,
       startMs: booking.occupiedStartMs,
       endMs: booking.occupiedEndMs,
-    })));
+    }));
+    const exceptions = this.scheduleExceptions.filter((exception) => (
+      exception.storeId === storeId
+      && exception.startMs < endMs
+      && startMs < exception.endMs
+    )).map((exception) => ({
+      exceptionId: exception.id,
+      startMs: exception.startMs,
+      endMs: exception.endMs,
+    }));
+    return copy([...bookings, ...exceptions]);
   }
 
   async insertBooking(booking) {

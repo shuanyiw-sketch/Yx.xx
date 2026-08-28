@@ -215,4 +215,27 @@ describe('customer booking reads', () => {
     expect(slots.some((slot) => slot.startMs === 3 * HOUR)).toBe(false);
     expect(slots.some((slot) => slot.startMs === 6 * HOUR)).toBe(true);
   });
+
+  it('turns an owner weekly rule into real slots without pre-generated windows', async () => {
+    const { repository, service } = createFixture();
+    repository.availabilityWindows = [];
+    repository.availabilityRules = [{
+      id: 'rule-1',
+      storeId: 'store-1',
+      weekday: 4,
+      intervals: [{ startMinute: 540, endMinute: 1080 }],
+      intervalMinutes: 30,
+    }];
+    const localDayStart = -8 * HOUR;
+
+    const slots = await service.listAvailableSlots({
+      storeId: 'store-1',
+      serviceId: 'service-1',
+      dayStartMs: localDayStart,
+      dayEndMs: localDayStart + DAY,
+      nowMs: 0,
+    });
+
+    expect(slots.some((slot) => slot.startMs === 2 * HOUR)).toBe(true);
+  });
 });

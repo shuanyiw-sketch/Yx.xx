@@ -132,9 +132,16 @@ function createCloudbaseRepository(database, rootDatabase = database) {
       const command = rootDatabase.command;
       const result = await database.collection('availabilityWindows').where({
         storeId,
-        dayStartMs: command.lte(startMs),
-        dayEndMs: command.gte(endMs),
+        dayStartMs: command.lt(endMs),
+        dayEndMs: command.gt(startMs),
       }).get();
+      return result.data.map(normalizeDocument);
+    },
+
+    async listAvailabilityRules(storeId, weekday) {
+      const result = await database.collection('availabilityRules')
+        .where({ storeId, weekday })
+        .get();
       return result.data.map(normalizeDocument);
     },
 
@@ -146,6 +153,21 @@ function createCloudbaseRepository(database, rootDatabase = database) {
       return normalizeDocument(result.data[0]);
     },
 
+    async touchScheduleGuard(storeId, dayStartMs, nowMs) {
+      const crypto = require('node:crypto');
+      const key = `${storeId}:${dayStartMs}`;
+      const guardId = `guard-${crypto.createHash('sha256').update(key).digest('hex')}`;
+      const document = database.collection('scheduleGuards').doc(guardId);
+      try {
+        await document.get();
+        await document.update({ data: { touchedAtMs: nowMs } });
+      } catch (error) {
+        if (error.errCode !== -1 && error.errCode !== 'DATABASE_DOCUMENT_NOT_EXIST') throw error;
+        await document.set({ data: { storeId, dayStartMs, touchedAtMs: nowMs } });
+      }
+      return true;
+    },
+
     async findBlockingPeriods(storeId, startMs, endMs, nowMs) {
       const { isBookingBlocking } = require('../domain/booking-state');
       const command = rootDatabase.command;
@@ -154,13 +176,24 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         occupiedStartMs: command.lt(endMs),
         occupiedEndMs: command.gt(startMs),
       }).get();
-      return result.data.map(normalizeDocument)
+      const bookings = result.data.map(normalizeDocument)
         .filter((booking) => isBookingBlocking(booking, nowMs))
         .map((booking) => ({
           bookingId: booking.id,
           startMs: booking.occupiedStartMs,
           endMs: booking.occupiedEndMs,
         }));
+      const exceptionResult = await database.collection('scheduleExceptions').where({
+        storeId,
+        startMs: command.lt(endMs),
+        endMs: command.gt(startMs),
+      }).get();
+      const exceptions = exceptionResult.data.map(normalizeDocument).map((exception) => ({
+        exceptionId: exception.id,
+        startMs: exception.startMs,
+        endMs: exception.endMs,
+      }));
+      return [...bookings, ...exceptions];
     },
 
     async insertBooking(booking) {

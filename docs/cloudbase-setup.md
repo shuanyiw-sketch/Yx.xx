@@ -22,8 +22,36 @@ Create these collections with client permissions set to no direct write access:
 - `bookings`
 - `favorites`
 - `notificationJobs`
+- `scheduleGuards`
 
 Public catalog reads, customer-private reads, and every write pass through `booking-api`. The client must never receive `openId`, owner notes, receipt details, or another customer's contact details from a public catalog response.
+
+For every collection above, choose the preset **No permission** for client database access. Cloud functions and the console retain server-side access, while mini-program reads and writes go through the allowlisted router.
+
+## Cloud function and storage permissions
+
+Require a logged-in CloudBase identity for the API and deny direct client invocation of the timer function:
+
+```json
+{
+  "*": { "invoke": false },
+  "booking-api": { "invoke": "auth != null" },
+  "booking-scheduler": { "invoke": false }
+}
+```
+
+The scheduler still runs from its timer trigger. Owner/customer authorization remains inside `booking-api`, because function rules cannot express application store roles.
+
+Portfolio images need public read access. The first release uploads from the signed-in owner client and publishes references only through an owner-authorized cloud action. Use creator-write storage rules:
+
+```json
+{
+  "read": true,
+  "write": "resource.openid == auth.openid || resource.openid == auth.uid"
+}
+```
+
+The app exposes no cloud-file deletion action. If stricter upload-cost protection is required, move binary upload behind a dedicated server upload service before production launch.
 
 ## Initial owner binding
 
@@ -49,6 +77,7 @@ Do not expose an owner-registration action in the mini program.
 - `bookings`: `requestId` unique
 - `notificationJobs`: `status + nextAttemptAtMs`
 - `favorites`: `userId + portfolioItemId` unique
+- `scheduleGuards`: document ID (serializes concurrent bookings for one store/day)
 
 ## Scheduler and subscription messages
 
@@ -65,3 +94,31 @@ Add these scheduler indexes:
 - `bookings`: `status + lockedUntil`
 - `bookings`: `status + startMs`
 - `notificationJobs`: unique `idempotencyKey`
+
+## Initial test data
+
+Create the first `stores` document:
+
+```json
+{
+  "name": "一瞬摄影",
+  "introduction": "记录自然、松弛而真实的片刻",
+  "contactText": "微信：your_wechat",
+  "bookingPolicy": "提交后 24 小时内确认，费用在线下沟通",
+  "timezone": "Asia/Shanghai"
+}
+```
+
+Use its document ID for `STORE_ID` and owner binding. Create services and works from the owner workbench. Save at least one weekly rule in “可预约设置”; the API converts weekly intervals into slots in the store timezone and excludes special-date records.
+
+## Deployment and rollback
+
+1. Run `pnpm test` and `pnpm lint`.
+2. Select the test CloudBase environment in WeChat Developer Tools.
+3. Deploy `booking-api` with cloud dependency installation.
+4. Deploy `booking-scheduler` and verify its five-minute trigger in the console.
+5. Configure scheduler environment variables and mini-program template IDs.
+6. Apply indexes and security rules, then upload an experience build.
+7. Complete `acceptance-checklist.md` with three real WeChat accounts.
+
+Keep the previous cloud-function version in the console. If the experience build fails, restore both functions, disable the scheduler trigger if involved, and roll back to the previous experience version. Do not delete bookings or collections; this release's schema changes are additive.
