@@ -1,6 +1,7 @@
 # Codex-local artifacts
 /outputs/
 /work/
+/.worktrees/
 
 # macOS
 .DS_Store
