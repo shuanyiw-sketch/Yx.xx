@@ -1,1 +1,1 @@
-.title{display:block;margin-top:16rpx}.hint{font-size:23rpx;line-height:1.7}
+.title{display:block;margin-top:16rpx}.hint{font-size:23rpx;line-height:1.7}.exception-row{display:flex;flex-direction:column;gap:8rpx;padding:16rpx 0;border-bottom:1rpx solid #eee;font-size:24rpx}

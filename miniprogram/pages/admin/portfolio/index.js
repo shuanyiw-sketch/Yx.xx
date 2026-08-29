@@ -2,7 +2,7 @@ const { callApi } = require('../../../api/cloud-api');
 Page({
   data: { items: [], title: '', summary: '', imageFileIds: [], saving: false },
   onShow() { this.load(); },
-  async load() { try { this.setData({ items: await callApi('catalog.listPortfolio', { storeId: getApp().globalData.storeId, limit: 30 }) }); } catch (error) { wx.showToast({ title: error.message, icon: 'none' }); } },
+  async load() { try { this.setData({ items: await callApi('admin.portfolio.list', { storeId: getApp().globalData.storeId }) }); } catch (error) { wx.showToast({ title: error.message, icon: 'none' }); } },
   update(event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value }); },
   async createDraft() {
     return callApi('admin.portfolio.save', { storeId: getApp().globalData.storeId, title: this.data.title || '未命名作品', summary: this.data.summary, imageFileIds: this.data.imageFileIds, coverFileId: this.data.imageFileIds[0] || '', tags: [], serviceIds: [], status: 'draft' });

@@ -85,9 +85,11 @@ Deploy `booking-scheduler` as a CloudBase cloud function. Its checked-in timer t
 
 - `BOOKING_REMINDER_TEMPLATE_ID`: the approved WeChat subscription-message template ID.
 - `BOOKING_CREATED_TEMPLATE_ID`: the approved new-booking template sent to the owner.
+- `BOOKING_CONFIRMED_TEMPLATE_ID`: the approved confirmation template sent to the customer.
+- `BOOKING_REJECTED_TEMPLATE_ID`: the approved rejection template sent to the customer. It may use the same approved template ID as confirmation when the template fields are compatible.
 - `MINIPROGRAM_STATE`: `developer`, `trial`, or `formal` (defaults to `formal`).
 
-The scheduler releases expired `pending` bookings, creates one reminder job per confirmed booking, and retries temporary delivery failures at most three times. User refusal and invalid-template errors are terminal. A message failure only updates `notificationJobs`; it never changes the booking status.
+The scheduler releases expired `pending` bookings, creates separate customer and owner reminder jobs per confirmed booking, and retries temporary delivery failures at most three times. User refusal and invalid-template errors are terminal. A message failure only updates `notificationJobs`; it never changes the booking status.
 
 Add these scheduler indexes:
 

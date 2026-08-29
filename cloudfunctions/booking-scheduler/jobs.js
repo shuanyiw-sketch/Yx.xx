@@ -12,10 +12,21 @@ async function expirePendingBookings(repository, nowMs) {
   const expired = await repository.listExpiredPending(nowMs);
   let count = 0;
   for (const booking of expired) {
+    const history = [
+      ...(booking.history || []),
+      {
+        fromStatus: 'pending',
+        toStatus: 'expired',
+        command: 'expire',
+        actorUserId: 'system',
+        atMs: nowMs,
+      },
+    ];
     const updated = await repository.updateBookingIfStatus(booking.id, 'pending', {
       status: 'expired',
       expiredAtMs: nowMs,
       updatedAtMs: nowMs,
+      history,
     });
     if (updated) count += 1;
   }
@@ -30,23 +41,51 @@ async function enqueueUpcomingReminders(repository, windowStartMs, windowEndMs) 
   let count = 0;
   for (const booking of bookings) {
     const type = 'upcoming';
-    const idempotencyKey = `${booking.id}:${type}:${booking.startMs}`;
-    const inserted = await repository.insertNotificationJobIfAbsent({
-      id: reminderId(idempotencyKey),
-      idempotencyKey,
-      bookingId: booking.id,
-      customerUserId: booking.customerUserId,
-      storeId: booking.storeId,
-      type,
-      scheduledAtMs: booking.startMs,
-      status: 'pending',
-      attempts: 0,
-      nextAttemptAtMs: windowStartMs,
-      createdAtMs: windowStartMs,
-    });
-    if (inserted) count += 1;
+    for (const recipientRole of ['customer', 'owner']) {
+      const idempotencyKey = `${booking.id}:${type}:${recipientRole}:${booking.startMs}`;
+      const inserted = await repository.insertNotificationJobIfAbsent({
+        id: reminderId(idempotencyKey),
+        idempotencyKey,
+        bookingId: booking.id,
+        customerUserId: booking.customerUserId,
+        storeId: booking.storeId,
+        type,
+        recipientRole,
+        scheduledAtMs: booking.startMs,
+        status: 'pending',
+        attempts: 0,
+        nextAttemptAtMs: windowStartMs,
+        createdAtMs: windowStartMs,
+      });
+      if (inserted) count += 1;
+    }
   }
   return count;
+}
+
+function notificationDeliveryConfig(job) {
+  const configs = {
+    booking_created: { recipientRole: 'owner', templateEnv: 'BOOKING_CREATED_TEMPLATE_ID' },
+    booking_confirmed: {
+      recipientRole: 'customer', templateEnv: 'BOOKING_CONFIRMED_TEMPLATE_ID',
+    },
+    booking_rejected: {
+      recipientRole: 'customer', templateEnv: 'BOOKING_REJECTED_TEMPLATE_ID',
+    },
+  };
+  if (job.type === 'upcoming') {
+    return {
+      recipientRole: job.recipientRole === 'owner' ? 'owner' : 'customer',
+      templateEnv: 'BOOKING_REMINDER_TEMPLATE_ID',
+    };
+  }
+  const config = configs[job.type];
+  if (!config) {
+    const error = new Error('不支持的通知类型');
+    error.code = 'UNKNOWN_NOTIFICATION_TYPE';
+    throw error;
+  }
+  return config;
 }
 
 function errorDetails(error) {
@@ -97,4 +136,5 @@ module.exports = {
   deliverNotificationJobs,
   enqueueUpcomingReminders,
   expirePendingBookings,
+  notificationDeliveryConfig,
 };

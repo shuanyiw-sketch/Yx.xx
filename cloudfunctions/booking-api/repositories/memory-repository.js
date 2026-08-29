@@ -137,6 +137,7 @@ class MemoryRepository {
     }));
     const exceptions = this.scheduleExceptions.filter((exception) => (
       exception.storeId === storeId
+      && exception.type !== 'overtime'
       && exception.startMs < endMs
       && startMs < exception.endMs
     )).map((exception) => ({
@@ -170,6 +171,10 @@ class MemoryRepository {
 
   async getPortfolioItem(portfolioItemId) {
     return copy(this.portfolio.find((item) => item.id === portfolioItemId) || null);
+  }
+
+  async listPortfolioByStore(storeId) {
+    return copy(this.portfolio.filter((item) => item.storeId === storeId));
   }
 
   async savePortfolioItem(portfolioItem) {

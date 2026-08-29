@@ -3,6 +3,7 @@ const {
   deliverNotificationJobs,
   enqueueUpcomingReminders,
   expirePendingBookings,
+  notificationDeliveryConfig,
 } = require('./jobs');
 const { createSchedulerRepository } = require('./repository');
 
@@ -15,22 +16,21 @@ const repository = createSchedulerRepository(database);
 async function sendSubscriptionMessage(job) {
   const bookingResult = await database.collection('bookings').doc(job.bookingId).get();
   const booking = bookingResult.data;
+  const config = notificationDeliveryConfig(job);
   let recipient;
-  let templateId;
-  if (job.type === 'booking_created') {
+  if (config.recipientRole === 'owner') {
     const ownerResult = await database.collection('users').where({
       role: 'owner',
       storeId: booking.storeId,
     }).limit(1).get();
     recipient = ownerResult.data[0];
-    templateId = process.env.BOOKING_CREATED_TEMPLATE_ID;
   } else {
     const customerResult = await database.collection('users')
       .doc(booking.customerUserId)
       .get();
     recipient = customerResult.data;
-    templateId = process.env.BOOKING_REMINDER_TEMPLATE_ID;
   }
+  const templateId = process.env[config.templateEnv];
   if (!recipient?.openId || !templateId) {
     const error = new Error('订阅消息接收人或模板未配置');
     error.code = 'MESSAGE_CONFIG_MISSING';

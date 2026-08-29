@@ -19,6 +19,15 @@
       </scroll-view>
     </view>
 
+    <view wx:if="{{favoriteWorks.length}}" class="section works-section">
+      <text class="section-label">我的收藏</text>
+      <scroll-view class="works" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="work-card" wx:for="{{favoriteWorks}}" wx:key="id">
+          <portfolio-card item="{{item}}" bind:open="openWork" />
+        </view>
+      </scroll-view>
+    </view>
+
     <view class="section info-card" bindtap="copyContact">
       <text class="section-label">联系与沟通</text>
       <text class="info-text">{{store.contactText || '预约确认后提供详细联系方式'}}</text>

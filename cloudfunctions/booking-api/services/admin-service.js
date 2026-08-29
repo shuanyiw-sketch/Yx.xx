@@ -119,6 +119,11 @@ function createAdminService(repository) {
       return repository.savePortfolioItem({ ...item, status: 'published' });
     },
 
+    async listPortfolio(storeId, session) {
+      requireOwner(session, storeId);
+      return repository.listPortfolioByStore(storeId);
+    },
+
     async reorderPortfolio(input, session) {
       requireOwner(session, input?.storeId);
       const updated = [];

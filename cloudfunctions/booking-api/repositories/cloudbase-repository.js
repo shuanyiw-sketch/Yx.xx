@@ -188,11 +188,13 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         startMs: command.lt(endMs),
         endMs: command.gt(startMs),
       }).get();
-      const exceptions = exceptionResult.data.map(normalizeDocument).map((exception) => ({
-        exceptionId: exception.id,
-        startMs: exception.startMs,
-        endMs: exception.endMs,
-      }));
+      const exceptions = exceptionResult.data.map(normalizeDocument)
+        .filter((exception) => exception.type !== 'overtime')
+        .map((exception) => ({
+          exceptionId: exception.id,
+          startMs: exception.startMs,
+          endMs: exception.endMs,
+        }));
       return [...bookings, ...exceptions];
     },
 
@@ -232,6 +234,11 @@ function createCloudbaseRepository(database, rootDatabase = database) {
         if (error.errCode === -1 || error.errCode === 'DATABASE_DOCUMENT_NOT_EXIST') return null;
         throw error;
       }
+    },
+
+    async listPortfolioByStore(storeId) {
+      const result = await database.collection('portfolioItems').where({ storeId }).get();
+      return result.data.map(normalizeDocument);
     },
 
     async savePortfolioItem(portfolioItem) {

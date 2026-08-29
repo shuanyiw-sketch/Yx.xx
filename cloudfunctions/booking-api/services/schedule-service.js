@@ -3,8 +3,15 @@ const { requireOwner } = require('../auth');
 const { overlaps } = require('../domain/availability');
 const { domainError } = require('../domain/validation');
 
+const EXCEPTION_TYPES = new Set(['blocked', 'offline_booking', 'overtime']);
+
 function createScheduleService(repository) {
   return {
+    async listExceptions(storeId, session) {
+      requireOwner(session, storeId);
+      return repository.listScheduleExceptions(storeId);
+    },
+
     async saveRule(input, session) {
       requireOwner(session, input?.storeId);
       if (!Number.isInteger(input.weekday) || input.weekday < 0 || input.weekday > 6
@@ -37,6 +44,9 @@ function createScheduleService(repository) {
       if (!Number.isFinite(input.startMs) || !Number.isFinite(input.endMs)
         || input.endMs <= input.startMs) {
         throw domainError('INVALID_EXCEPTION', '特殊档期时间无效');
+      }
+      if (!EXCEPTION_TYPES.has(input.type || 'blocked')) {
+        throw domainError('INVALID_EXCEPTION_TYPE', '特殊档期类型无效');
       }
       const existing = await repository.listScheduleExceptions(input.storeId);
       if (existing.some((exception) => (

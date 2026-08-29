@@ -2,7 +2,7 @@ const crypto = require('node:crypto');
 const { requireAuthenticated, requireOwner } = require('../auth');
 const { calculateAvailableSlots } = require('../domain/availability');
 const { nextStatus } = require('../domain/booking-state');
-const { domainError, localDateKey } = require('../domain/validation');
+const { assertSameStoreDay, domainError, localDateKey } = require('../domain/validation');
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -23,15 +23,40 @@ function stableId(prefix, value) {
 }
 
 function assertCreateInput(input) {
-  if (!input?.storeId || !input?.serviceId || !input?.requestId) {
+  if (typeof input?.storeId !== 'string' || !input.storeId.trim()
+    || typeof input?.serviceId !== 'string' || !input.serviceId.trim()
+    || typeof input?.requestId !== 'string' || !input.requestId.trim()
+    || input.requestId.length > 128) {
     throw domainError('INVALID_INPUT', '预约信息不完整');
   }
   if (!Number.isFinite(input.startMs) || !Number.isFinite(input.nowMs)) {
     throw domainError('INVALID_TIME_RANGE', '预约时间无效');
   }
-  if (!input.customer?.name || !input.customer?.phone) {
+  if (typeof input.customer?.name !== 'string'
+    || !input.customer.name.trim()
+    || input.customer.name.trim().length > 50
+    || typeof input.customer?.phone !== 'string'
+    || !/^1\d{10}$/.test(input.customer.phone)) {
     throw domainError('INVALID_CUSTOMER', '请填写联系人姓名和手机号');
   }
+  if (input.location !== undefined
+    && (typeof input.location !== 'string' || input.location.length > 200)) {
+    throw domainError('INVALID_LOCATION', '服务地点不能超过 200 个字');
+  }
+  if (input.notes !== undefined
+    && (typeof input.notes !== 'string' || input.notes.length > 500)) {
+    throw domainError('INVALID_NOTES', '预约备注不能超过 500 个字');
+  }
+  if (input.peopleCount !== undefined && input.peopleCount !== null
+    && (!Number.isInteger(input.peopleCount)
+      || input.peopleCount < 1
+      || input.peopleCount > 100)) {
+    throw domainError('INVALID_PEOPLE_COUNT', '服务人数必须是 1 到 100 的整数');
+  }
+}
+
+function historyEntry(fromStatus, toStatus, command, actorUserId, atMs) {
+  return { fromStatus, toStatus, command, actorUserId, atMs };
 }
 
 function serviceSnapshot(service) {
@@ -85,17 +110,29 @@ function timestampInZone(dateKey, minuteOfDay, timeZone) {
 
 async function resolveAvailabilityWindows(repository, store, startMs, endMs) {
   const materialized = await repository.getAvailabilityWindows(store.id, startMs, endMs);
-  if (materialized.length) return materialized;
+  const exceptions = await repository.listScheduleExceptions(store.id);
+  const overtimeWindows = exceptions.filter((exception) => (
+    exception.type === 'overtime'
+    && exception.startMs < endMs
+    && startMs < exception.endMs
+  )).map((exception) => ({
+    storeId: store.id,
+    dayStartMs: exception.startMs,
+    dayEndMs: exception.endMs,
+    intervalMinutes: exception.intervalMinutes || 30,
+  }));
+  if (materialized.length) return [...materialized, ...overtimeWindows];
   const timeZone = store.timezone || 'Asia/Shanghai';
   const dateKey = localDateKey(startMs + Math.floor((endMs - startMs) / 2), timeZone);
   const weekday = new Date(`${dateKey}T00:00:00.000Z`).getUTCDay();
   const rules = await repository.listAvailabilityRules(store.id, weekday);
-  return rules.flatMap((rule) => rule.intervals.map((interval) => ({
+  const weeklyWindows = rules.flatMap((rule) => rule.intervals.map((interval) => ({
     storeId: store.id,
     dayStartMs: timestampInZone(dateKey, interval.startMinute, timeZone),
     dayEndMs: timestampInZone(dateKey, interval.endMinute, timeZone),
     intervalMinutes: rule.intervalMinutes || 30,
   })));
+  return [...weeklyWindows, ...overtimeWindows];
 }
 
 function createBookingService(repository) {
@@ -135,7 +172,10 @@ function createBookingService(repository) {
           busy,
         });
       }));
-      return slotGroups.flat().sort((first, second) => first.startMs - second.startMs);
+      const uniqueSlots = new Map(slotGroups.flat().map((slot) => (
+        [`${slot.startMs}:${slot.endMs}`, slot]
+      )));
+      return [...uniqueSlots.values()].sort((first, second) => first.startMs - second.startMs);
     },
 
     async listMine(session) {
@@ -176,6 +216,7 @@ function createBookingService(repository) {
         }
 
         const serviceEndMs = input.startMs + service.durationMinutes * 60_000;
+        assertSameStoreDay(input.startMs, serviceEndMs, store.timezone || 'Asia/Shanghai');
         const occupiedStartMs = input.startMs - service.bufferBeforeMinutes * 60_000;
         const occupiedEndMs = serviceEndMs + service.bufferAfterMinutes * 60_000;
         const windows = await resolveAvailabilityWindows(
@@ -188,6 +229,9 @@ function createBookingService(repository) {
           candidate.dayStartMs <= occupiedStartMs && candidate.dayEndMs >= occupiedEndMs
         ));
         if (!window) throw domainError('SLOT_UNAVAILABLE', '该时间不在可预约档期内');
+        if (input.startMs % (window.intervalMinutes * 60_000) !== 0) {
+          throw domainError('INVALID_SLOT_GRANULARITY', '请选择列表中的标准档期');
+        }
 
         await transaction.touchScheduleGuard(input.storeId, window.dayStartMs, input.nowMs);
 
@@ -215,10 +259,13 @@ function createBookingService(repository) {
           serviceId: input.serviceId,
           requestId: input.requestId,
           customerUserId: session.userId,
-          customer: { ...input.customer },
-          location: input.location || '',
+          customer: {
+            name: input.customer.name.trim(),
+            phone: input.customer.phone,
+          },
+          location: input.location?.trim() || '',
           peopleCount: input.peopleCount || null,
-          notes: input.notes || '',
+          notes: input.notes?.trim() || '',
           startMs: input.startMs,
           endMs: serviceEndMs,
           occupiedStartMs,
@@ -226,6 +273,7 @@ function createBookingService(repository) {
           status: 'pending',
           lockedUntil: input.nowMs + DAY_MS,
           serviceSnapshot: serviceSnapshot(service),
+          history: [historyEntry(null, 'pending', 'create', session.userId, input.nowMs)],
           createdAtMs: input.nowMs,
           updatedAtMs: input.nowMs,
         };
@@ -249,7 +297,7 @@ function createBookingService(repository) {
         throw domainError('INVALID_INPUT', '预约操作参数无效');
       }
 
-      return repository.runTransaction(async (transaction) => {
+      const result = await repository.runTransaction(async (transaction) => {
         const booking = await transaction.getBooking(input.bookingId);
         if (!booking) throw domainError('BOOKING_NOT_FOUND', '预约不存在');
 
@@ -263,20 +311,58 @@ function createBookingService(repository) {
           throw domainError('INVALID_TRANSITION', '当前预约状态不支持此操作');
         }
 
+        if (booking.status === 'pending' && booking.lockedUntil <= input.nowMs) {
+          const history = [
+            ...(booking.history || []),
+            historyEntry('pending', 'expired', 'expire', session.userId, input.nowMs),
+          ];
+          const expired = await transaction.updateBookingIfStatus(
+            booking.id,
+            'pending',
+            {
+              status: 'expired', expiredAtMs: input.nowMs, updatedAtMs: input.nowMs, history,
+            },
+          );
+          if (!expired) throw domainError('BOOKING_CHANGED', '预约状态已变化，请刷新后重试');
+          return { booking: expired, expired: true };
+        }
+
         if (booking.status === COMMAND_RESULTS[input.command]
           && booking.lastCommand === input.command) {
-          return booking;
+          return { booking, expired: false };
         }
 
         const status = nextStatus(booking.status, input.command);
+        const history = [
+          ...(booking.history || []),
+          historyEntry(booking.status, status, input.command, session.userId, input.nowMs),
+        ];
         const updated = await transaction.updateBookingIfStatus(
           booking.id,
           booking.status,
-          { status, lastCommand: input.command, updatedAtMs: input.nowMs },
+          { status, lastCommand: input.command, updatedAtMs: input.nowMs, history },
         );
         if (!updated) throw domainError('BOOKING_CHANGED', '预约状态已变化，请刷新后重试');
-        return updated;
+        if (input.command === 'confirm' || input.command === 'reject') {
+          const type = input.command === 'confirm' ? 'booking_confirmed' : 'booking_rejected';
+          await transaction.insertNotificationJob({
+            id: stableId('notification', `${booking.id}:${type}`),
+            type,
+            bookingId: booking.id,
+            customerUserId: booking.customerUserId,
+            storeId: booking.storeId,
+            status: 'pending',
+            attempts: 0,
+            nextAttemptAtMs: input.nowMs,
+            createdAtMs: input.nowMs,
+          });
+        }
+        return { booking: updated, expired: false };
       });
+      if (result.expired) {
+        throw domainError('BOOKING_EXPIRED', '待确认预约已过期，不能继续操作');
+      }
+      return result.booking;
     },
   };
 }

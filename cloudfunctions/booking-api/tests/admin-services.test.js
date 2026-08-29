@@ -34,6 +34,23 @@ function createFixture() {
 }
 
 describe('admin service authorization and snapshots', () => {
+  it('lists an owner\'s published and draft portfolio items for publishing', async () => {
+    const { admin, repository } = createFixture();
+    repository.portfolio.push(
+      { id: 'published-work', storeId: 'store-1', status: 'published', title: '已发布作品' },
+      { id: 'draft-work', storeId: 'store-1', status: 'draft', title: '待发布草稿' },
+      { id: 'other-draft', storeId: 'store-2', status: 'draft', title: '其他店铺草稿' },
+    );
+
+    await expect(admin.listPortfolio('store-1', owner)).resolves.toEqual([
+      { id: 'published-work', storeId: 'store-1', status: 'published', title: '已发布作品' },
+      { id: 'draft-work', storeId: 'store-1', status: 'draft', title: '待发布草稿' },
+    ]);
+    await expect(admin.listPortfolio('store-1', otherOwner)).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    });
+  });
+
   it('rejects every mutation for a different store', async () => {
     const { admin } = createFixture();
 
@@ -85,6 +102,28 @@ describe('admin service authorization and snapshots', () => {
 });
 
 describe('schedule validation', () => {
+  it('rejects unsupported schedule exception types', async () => {
+    const { schedule } = createFixture();
+    await expect(schedule.saveException({
+      storeId: 'store-1', startMs: 100, endMs: 200, type: 'mystery',
+    }, owner)).rejects.toMatchObject({ code: 'INVALID_EXCEPTION_TYPE' });
+  });
+
+  it('lists only the owner store\'s schedule exceptions', async () => {
+    const { repository, schedule } = createFixture();
+    repository.scheduleExceptions.push(
+      { id: 'exception-1', storeId: 'store-1', startMs: 100, endMs: 200, type: 'blocked' },
+      { id: 'exception-2', storeId: 'store-2', startMs: 300, endMs: 400, type: 'offline' },
+    );
+
+    await expect(schedule.listExceptions('store-1', owner)).resolves.toEqual([
+      { id: 'exception-1', storeId: 'store-1', startMs: 100, endMs: 200, type: 'blocked' },
+    ]);
+    await expect(schedule.listExceptions('store-1', otherOwner)).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    });
+  });
+
   it('rejects overlapping weekly intervals', async () => {
     const { schedule } = createFixture();
 

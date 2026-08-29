@@ -1,6 +1,74 @@
 const { requireAuthenticated, requireOwner } = require('./auth');
 const { domainError } = require('./domain/validation');
 
+const CUSTOMER_BOOKING_FIELDS = [
+  'id',
+  'storeId',
+  'serviceId',
+  'customer',
+  'location',
+  'peopleCount',
+  'notes',
+  'startMs',
+  'endMs',
+  'status',
+  'history',
+  'lockedUntil',
+  'serviceSnapshot',
+  'createdAtMs',
+  'updatedAtMs',
+];
+
+const OWNER_BOOKING_FIELDS = [
+  ...CUSTOMER_BOOKING_FIELDS,
+  'customerUserId',
+  'occupiedStartMs',
+  'occupiedEndMs',
+  'lastCommand',
+  'ownerNote',
+  'receipts',
+  'receivedTotalFen',
+];
+
+function pickDefined(record, fields) {
+  if (!record || typeof record !== 'object') return record;
+  return Object.fromEntries(fields
+    .filter((field) => record[field] !== undefined)
+    .map((field) => [field, record[field]]));
+}
+
+function filterBooking(data, fields) {
+  return Array.isArray(data)
+    ? data.map((booking) => pickDefined(booking, fields))
+    : pickDefined(data, fields);
+}
+
+function filterResponse(action, data, session) {
+  if (data === null || data === undefined) return data;
+  if (['booking.create', 'booking.listMine', 'booking.getMine'].includes(action)) {
+    return filterBooking(data, CUSTOMER_BOOKING_FIELDS);
+  }
+  if (action === 'booking.command') {
+    return filterBooking(data, session?.isOwner ? OWNER_BOOKING_FIELDS : CUSTOMER_BOOKING_FIELDS);
+  }
+  if (['admin.booking.command', 'admin.booking.recordReceipt'].includes(action)) {
+    return filterBooking(data, OWNER_BOOKING_FIELDS);
+  }
+  if (action === 'admin.dashboard.get') {
+    return {
+      ...data,
+      bookings: filterBooking(data?.bookings || [], OWNER_BOOKING_FIELDS),
+    };
+  }
+  if (action === 'admin.customer.get') {
+    return {
+      ...data,
+      bookings: filterBooking(data?.bookings || [], OWNER_BOOKING_FIELDS),
+    };
+  }
+  return data;
+}
+
 const ACTIONS = {
   'session.get': {
     access: 'session',
@@ -80,6 +148,10 @@ const ACTIONS = {
     access: 'owner',
     execute: ({ payload, services, session }) => services.admin.publishPortfolio(payload, session),
   },
+  'admin.portfolio.list': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.admin.listPortfolio(payload.storeId, session),
+  },
   'admin.portfolio.reorder': {
     access: 'owner',
     execute: ({ payload, services, session }) => services.admin.reorderPortfolio(payload, session),
@@ -91,6 +163,13 @@ const ACTIONS = {
   'admin.schedule.saveException': {
     access: 'owner',
     execute: ({ payload, services, session }) => services.schedule.saveException(payload, session),
+  },
+  'admin.schedule.listExceptions': {
+    access: 'owner',
+    execute: ({ payload, services, session }) => services.schedule.listExceptions(
+      payload.storeId,
+      session,
+    ),
   },
   'admin.customer.list': {
     access: 'owner',
@@ -177,10 +256,17 @@ async function route(request, dependencies) {
       services: dependencies.services,
       session,
     });
-    return { ok: true, data };
+    return { ok: true, data: filterResponse(request.action, data, session) };
   } catch (error) {
     return publicFailure(error);
   }
 }
 
-module.exports = { ACTIONS, publicFailure, route };
+module.exports = {
+  ACTIONS,
+  CUSTOMER_BOOKING_FIELDS,
+  OWNER_BOOKING_FIELDS,
+  filterResponse,
+  publicFailure,
+  route,
+};
