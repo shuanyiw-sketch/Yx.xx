@@ -1,0 +1,29 @@
+.services-page {
+  padding-top: 48rpx;
+}
+
+.hero {
+  margin-bottom: 44rpx;
+}
+
+.section-title,
+.intro {
+  display: block;
+}
+
+.section-title {
+  margin-top: 18rpx;
+}
+
+.intro {
+  color: #7d746d;
+  font-size: 25rpx;
+  line-height: 1.75;
+  margin-top: 20rpx;
+}
+
+.state {
+  color: #8b827a;
+  padding: 120rpx 0;
+  text-align: center;
+}

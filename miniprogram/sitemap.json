@@ -1,0 +1,8 @@
+{
+  "desc": "公开作品和服务可被微信索引",
+  "rules": [
+    { "action": "allow", "page": "pages/portfolio/index" },
+    { "action": "allow", "page": "pages/services/index" },
+    { "action": "disallow", "page": "*" }
+  ]
+}

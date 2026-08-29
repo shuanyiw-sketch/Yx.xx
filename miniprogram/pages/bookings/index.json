@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的预约",
+  "usingComponents": {
+    "booking-status": "/components/booking-status/index"
+  }
+}

@@ -1,0 +1,1 @@
+.title,.phone,.name{display:block}.title{margin-top:16rpx}.phone{color:#817870;font-size:21rpx;margin-top:8rpx}.name{font-size:30rpx;margin-bottom:10rpx}

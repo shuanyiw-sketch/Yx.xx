@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/portfolio/index",
+    "pages/portfolio-detail/index",
+    "pages/services/index",
+    "pages/booking-create/index",
+    "pages/bookings/index",
+    "pages/booking-detail/index",
+    "pages/profile/index",
+    "pages/admin/dashboard/index",
+    "pages/admin/calendar/index",
+    "pages/admin/booking-detail/index",
+    "pages/admin/services/index",
+    "pages/admin/portfolio/index",
+    "pages/admin/availability/index",
+    "pages/admin/customers/index",
+    "pages/admin/store/index"
+  ],
+  "window": {
+    "backgroundColor": "#F7F5F2",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "作品预约"
+  },
+  "tabBar": {
+    "color": "#817B74",
+    "selectedColor": "#24211E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/portfolio/index", "text": "作品" },
+      { "pagePath": "pages/services/index", "text": "服务" },
+      { "pagePath": "pages/bookings/index", "text": "预约" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

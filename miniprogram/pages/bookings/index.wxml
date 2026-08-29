@@ -1,0 +1,27 @@
+<view class="page-shell bookings-page">
+  <view class="hero">
+    <text class="eyebrow">MY BOOKINGS</text>
+    <text class="section-title">我的预约</text>
+    <text class="intro">查看确认进度、服务时间和历史记录。</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">正在读取预约…</view>
+  <view wx:elif="{{errorMessage}}" class="state">{{errorMessage}}</view>
+  <view wx:elif="{{!bookings.length}}" class="state">还没有预约记录，先去看看作品吧</view>
+  <view wx:else>
+    <view
+      wx:for="{{bookings}}"
+      wx:key="id"
+      class="booking-card"
+      data-id="{{item.id}}"
+      bindtap="openBooking"
+    >
+      <view class="card-top">
+        <text class="service-name">{{item.serviceSnapshot.name}}</text>
+        <booking-status status="{{item.status}}" />
+      </view>
+      <text class="time">{{item.displayTime}}</text>
+      <text class="arrow">查看详情 →</text>
+    </view>
+  </view>
+</view>

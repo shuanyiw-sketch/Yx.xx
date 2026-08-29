@@ -1,0 +1,41 @@
+.card {
+  margin-bottom: 28rpx;
+  overflow: hidden;
+}
+
+.cover {
+  background: #e7e1da;
+  border-radius: 6rpx;
+  display: block;
+  min-height: 260rpx;
+  width: 100%;
+}
+
+.cover-placeholder {
+  align-items: center;
+  background: linear-gradient(145deg, #ded4ca, #f0ebe5);
+  border-radius: 6rpx;
+  color: #968c83;
+  display: flex;
+  height: 380rpx;
+  justify-content: center;
+  letter-spacing: 4rpx;
+}
+
+.body {
+  padding: 16rpx 2rpx 0;
+}
+
+.title {
+  display: block;
+  font-family: "Songti SC", serif;
+  font-size: 28rpx;
+  line-height: 1.45;
+}
+
+.tag {
+  color: #93877e;
+  display: block;
+  font-size: 20rpx;
+  margin-top: 6rpx;
+}

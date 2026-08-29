@@ -1,0 +1,12 @@
+.dashboard {
+  padding-top: 48rpx;
+}
+.section-title { display: block; margin-top: 18rpx; }
+.metrics { display: flex; gap: 14rpx; margin-top: 42rpx; }
+.metric { background: #fff; border-radius: 12rpx; color: #756d67; display: flex; flex: 1; flex-direction: column; font-size: 21rpx; padding: 26rpx 20rpx; }
+.metric.warm { background: #eee3d2; }
+.metric.alert { background: #ead9d5; }
+.number { color: #2c2825; font-family: "Songti SC", serif; font-size: 48rpx; margin-bottom: 8rpx; }
+.menu { background: #fff; border-radius: 12rpx; margin-top: 34rpx; padding: 0 28rpx; }
+.menu-item { border-bottom: 1rpx solid #eee9e4; display: flex; font-size: 27rpx; justify-content: space-between; padding: 30rpx 0; }
+.menu-item:last-child { border: 0; }

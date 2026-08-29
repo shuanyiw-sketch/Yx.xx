@@ -1,0 +1,105 @@
+page {
+  background: #f7f5f2;
+  color: #24211e;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 28rpx;
+}
+
+.page-shell {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 32rpx;
+}
+
+.empty-state {
+  color: #817b74;
+  padding: 160rpx 32rpx;
+  text-align: center;
+}
+
+.eyebrow {
+  color: #96735d;
+  font-size: 20rpx;
+  font-weight: 600;
+  letter-spacing: 5rpx;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 48rpx;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+  line-height: 1.25;
+}
+
+.muted {
+  color: #817b74;
+}
+
+.pill {
+  background: #efe9e2;
+  border-radius: 999rpx;
+  color: #69594e;
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 10rpx 18rpx;
+}
+
+.primary-button {
+  align-items: center;
+  background: #24211e;
+  border-radius: 999rpx;
+  color: #fff;
+  display: flex;
+  font-size: 26rpx;
+  font-weight: 600;
+  justify-content: center;
+  min-height: 88rpx;
+}
+
+.admin-card {
+  background: #fff;
+  border: 1rpx solid #e6e0da;
+  border-radius: 12rpx;
+  margin-top: 24rpx;
+  padding: 28rpx;
+}
+
+.admin-field {
+  border-bottom: 1rpx solid #eee9e4;
+  padding: 22rpx 0;
+}
+
+.admin-label {
+  color: #80776f;
+  display: block;
+  font-size: 22rpx;
+  margin-bottom: 12rpx;
+}
+
+.admin-input {
+  font-size: 27rpx;
+  width: 100%;
+}
+
+.admin-button {
+  background: #292622;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: 25rpx;
+  line-height: 82rpx;
+  margin-top: 28rpx;
+}
+
+.admin-button::after {
+  border: none;
+}
+
+.admin-list-row {
+  align-items: center;
+  border-bottom: 1rpx solid #eee9e4;
+  display: flex;
+  justify-content: space-between;
+  padding: 26rpx 0;
+}

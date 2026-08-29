@@ -1,0 +1,17 @@
+<view class="page-shell dashboard">
+  <text class="eyebrow">OWNER STUDIO</text>
+  <text class="section-title">今天，先处理这些</text>
+  <view class="metrics">
+    <view class="metric"><text class="number">{{today.length}}</text><text>今日安排</text></view>
+    <view class="metric warm"><text class="number">{{pending.length}}</text><text>待确认</text></view>
+    <view class="metric alert"><text class="number">{{expiringSoon.length}}</text><text>即将到期</text></view>
+  </view>
+  <view class="menu">
+    <view class="menu-item" data-url="/pages/admin/calendar/index" bindtap="openSection"><text>档期日历</text><text>→</text></view>
+    <view class="menu-item" data-url="/pages/admin/services/index" bindtap="openSection"><text>服务管理</text><text>→</text></view>
+    <view class="menu-item" data-url="/pages/admin/portfolio/index" bindtap="openSection"><text>作品管理</text><text>→</text></view>
+    <view class="menu-item" data-url="/pages/admin/availability/index" bindtap="openSection"><text>可预约设置</text><text>→</text></view>
+    <view class="menu-item" data-url="/pages/admin/customers/index" bindtap="openSection"><text>客户记录</text><text>→</text></view>
+    <view class="menu-item" data-url="/pages/admin/store/index" bindtap="openSection"><text>主页设置</text><text>→</text></view>
+  </view>
+</view>

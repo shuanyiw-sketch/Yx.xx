@@ -1,0 +1,15 @@
+{
+  "name": "personal-creative-booking-mini-program",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "vitest run --globals --pool=threads --no-file-parallelism --maxWorkers=1 --minWorkers=1",
+    "test:watch": "vitest --globals --pool=threads --no-file-parallelism --maxWorkers=1 --minWorkers=1",
+    "lint": "node scripts/lint.js"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "vitest": "^2.1.9"
+  }
+}

@@ -1,0 +1,1 @@
+.title{display:block;margin-top:16rpx}.double{display:flex;gap:20rpx}.danger{color:#a04d43;font-size:22rpx}

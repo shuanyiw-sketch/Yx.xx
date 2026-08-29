@@ -1,0 +1,41 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="state">正在打开作品…</view>
+  <view wx:elif="{{errorMessage}}" class="state">{{errorMessage}}</view>
+  <block wx:elif="{{item}}">
+    <swiper class="gallery" indicator-dots="{{item.imageFileIds.length > 1}}" circular="true">
+      <swiper-item wx:for="{{item.imageFileIds}}" wx:key="*this">
+        <image class="gallery-image" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+      <swiper-item wx:if="{{!item.imageFileIds.length}}">
+        <view class="gallery-placeholder">作品影像</view>
+      </swiper-item>
+    </swiper>
+
+    <view class="content">
+      <view class="title-row">
+        <view>
+          <text class="eyebrow">PORTFOLIO</text>
+          <text class="title">{{item.title}}</text>
+        </view>
+        <button class="favorite {{favorited ? 'active' : ''}}" bindtap="toggleFavorite">
+          {{favorited ? '♥' : '♡'}}
+        </button>
+      </view>
+      <text wx:if="{{item.summary}}" class="summary">{{item.summary}}</text>
+      <view class="tags">
+        <text wx:for="{{item.tags}}" wx:key="*this" class="pill">{{item}}</text>
+      </view>
+
+      <view wx:if="{{linkedServices.length}}" class="linked">
+        <text class="linked-kicker">喜欢这种感觉？</text>
+        <text class="linked-title">预约类似服务</text>
+        <service-card
+          wx:for="{{linkedServices}}"
+          wx:key="id"
+          service="{{item}}"
+          bind:book="book"
+        />
+      </view>
+    </view>
+  </block>
+</view>

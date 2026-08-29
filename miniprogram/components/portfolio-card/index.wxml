@@ -1,0 +1,15 @@
+<view class="card" bindtap="open">
+  <image
+    wx:if="{{item.coverFileId}}"
+    class="cover"
+    mode="widthFix"
+    src="{{item.coverFileId}}"
+  />
+  <view wx:else class="cover-placeholder">
+    <text>作品影像</text>
+  </view>
+  <view class="body">
+    <text class="title">{{item.title}}</text>
+    <text wx:if="{{item.tags.length}}" class="tag">{{item.tags[0]}}</text>
+  </view>
+</view>
